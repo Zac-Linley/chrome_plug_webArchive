@@ -15,6 +15,7 @@ const {
   readBookmarks,
   mergeInbox,
   renderReadme,
+  putFile,
 } = mod;
 
 // ---------- 假 GitHub ----------
@@ -150,6 +151,13 @@ const readme = renderReadme(bookmarks, "tester", "bookmarks");
 assert(readme.includes("示例文章"), "README 含书签标题");
 assert(readme.includes("🏷️ 标签"), "README 含标签索引");
 assert(readme.includes("技术/前端"), "README 按文件夹分组");
+
+// 4b. 不带 sha 更新已存在的文件（重建 README 场景）
+await putFile("tok", "tester", "bookmarks", "README.md", renderReadme(bookmarks, "tester", "bookmarks"), {
+  message: "Update README",
+  branch: "main",
+});
+assert(true, "无 sha 更新已存在文件成功（自动补 sha）");
 
 // 5. 合并 inbox
 function setInboxEntry(name, payload) {

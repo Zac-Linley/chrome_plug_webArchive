@@ -160,8 +160,14 @@ export async function getFile(token, owner, repo, path, branch) {
 }
 
 export async function putFile(token, owner, repo, path, content, { sha, message, branch } = {}) {
+  // 更新已存在的文件必须携带 sha；未提供时自动读取一次，避免漏传
+  let finalSha = sha;
+  if (!finalSha) {
+    const existing = await getFile(token, owner, repo, path, branch);
+    finalSha = existing ? existing.sha : null;
+  }
   const body = { message: message || `Update ${path}`, content: encodeBase64(content) };
-  if (sha) body.sha = sha;
+  if (finalSha) body.sha = finalSha;
   if (branch) body.branch = branch;
   return request(token, `/repos/${owner}/${repo}/contents/${encodePath(path)}`, {
     method: "PUT",
