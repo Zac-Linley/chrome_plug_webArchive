@@ -14,7 +14,7 @@
 1. 打开「快捷指令」App，新建快捷指令
 2. 点右上角 **ⓘ（Details）**，打开 **Show in Share Sheet**（在共享表单中显示）
 3. 返回画布，顶部会自动出现一个 **Receive ... from ...**（接收…来自…）输入块——这是自动生成的，**不用在操作列表里搜**；点它把输入类型设为 URL 和 Text（保持 Anything 也可以）
-4. 用 **Get URLs from Input**（从输入中获取 URL）和 **Get Name from Input**（从输入中获取名称）拆出链接和标题
+4. 用 **Get URLs from Input**（从输入中获取 URL）和 **Get Name**（获取名称，英文就叫 Get Name，没有 "from Input"）拆出链接和标题
 5. 添加 **Text**（文本）操作，内容粘贴下面的 JSON 模板，把其中 `URL`、`TITLE`、`CREATED_AT` 替换为对应的魔术变量
 6. 对这段 JSON 执行 **Base64 Encode**（Base64 编码）
 7. 添加 **Get Contents of URL**（获取 URL 内容），Method 选 PUT，URL 填：
