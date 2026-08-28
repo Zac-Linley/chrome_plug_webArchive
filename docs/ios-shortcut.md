@@ -12,11 +12,12 @@
 ## 创建快捷指令步骤
 
 1. 打开「快捷指令」App，新建快捷指令
-2. 添加操作 **Receive Shortcut Input**（接收快捷指令输入），Input Type 选 URL 和 Text（分享菜单里会自动带过来）
-3. 用 **Get URLs from Input**（从输入中获取 URL）和 **Get Name from Input**（从输入中获取名称）拆出链接和标题
-4. 添加 **Text**（文本）操作，内容粘贴下面的 JSON 模板，把其中 `URL`、`TITLE`、`CREATED_AT` 替换为对应的魔术变量
-5. 对这段 JSON 执行 **Base64 Encode**（Base64 编码）
-6. 添加 **Get Contents of URL**（获取 URL 内容），Method 选 PUT，URL 填：
+2. 点右上角 **ⓘ（Details）**，打开 **Show in Share Sheet**（在共享表单中显示）
+3. 返回画布，顶部会自动出现一个 **Receive ... from ...**（接收…来自…）输入块——这是自动生成的，**不用在操作列表里搜**；点它把输入类型设为 URL 和 Text（保持 Anything 也可以）
+4. 用 **Get URLs from Input**（从输入中获取 URL）和 **Get Name from Input**（从输入中获取名称）拆出链接和标题
+5. 添加 **Text**（文本）操作，内容粘贴下面的 JSON 模板，把其中 `URL`、`TITLE`、`CREATED_AT` 替换为对应的魔术变量
+6. 对这段 JSON 执行 **Base64 Encode**（Base64 编码）
+7. 添加 **Get Contents of URL**（获取 URL 内容），Method 选 PUT，URL 填：
 
 ```
 https://api.github.com/repos/<owner>/<repo>/contents/data/inbox/<YYYY-MM-DDTHH-mm-ss>.json
@@ -24,13 +25,15 @@ https://api.github.com/repos/<owner>/<repo>/contents/data/inbox/<YYYY-MM-DDTHH-m
 
    文件名用当前日期时间生成，保证唯一。
 
-7. 请求头填三项：
+8. 请求头填三项：
    - `Authorization`：`Bearer <你的 token>`
    - `Accept`：`application/vnd.github+json`
    - `Content-Type`：`application/json`
-8. 请求体粘贴下面的 PUT 请求模板（`CONTENT` 替换为第 5 步的 Base64 结果）
-9. 收尾加一个 **Show Notification**（显示通知），提示收藏成功
-10. 快捷指令设置里开启 **Show in Share Sheet**（在共享表单中显示），并勾选 Safari 等 App
+9. 请求体粘贴下面的 PUT 请求模板（`CONTENT` 替换为第 6 步的 Base64 结果）
+10. 收尾加一个 **Show Notification**（显示通知），提示收藏成功
+11. 如果第 3 步画布顶部没出现输入块：先随便添加一个操作（比如 Text），再回到 ⓘ 里把 Show in Share Sheet 关掉重开一次
+
+> 分享菜单里要看到这个快捷指令，前提是第 2 步的 Show in Share Sheet 已开启，并在分享时选择它。
 
 ## JSON 模板（第 4 步用）
 
