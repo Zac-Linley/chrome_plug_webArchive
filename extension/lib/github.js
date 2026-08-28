@@ -378,7 +378,8 @@ export function renderReadme(bookmarks, owner, repo) {
       const tags = (it.tags || []).map((t) => `\`#${t}\``).join(" ");
       const note = it.note ? ` — ${escapeMarkdown(it.note)}` : "";
       const title = escapeMarkdown(it.title || it.url);
-      lines.push(`- [${title}](${it.url}) ${tags}${note}`);
+      const link = it.url ? `[${title}](${it.url})` : title;
+      lines.push(`- ${link} ${tags}${note}`);
     }
     lines.push("");
   }
@@ -401,7 +402,9 @@ export function renderReadme(bookmarks, owner, repo) {
     lines.push("");
     for (const it of recent) {
       const tags = (it.tags || []).map((t) => `\`#${t}\``).join(" ");
-      lines.push(`- [${escapeMarkdown(it.title || it.url)}](${it.url}) ${tags}`);
+      const title = escapeMarkdown(it.title || it.url);
+      const link = it.url ? `[${title}](${it.url})` : title;
+      lines.push(`- ${link} ${tags}`);
     }
     lines.push("");
   }
