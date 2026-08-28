@@ -3,6 +3,7 @@ import {
   listRepos,
   initRepository,
   isNetworkError,
+  friendlyError,
 } from "../lib/github.js";
 import { getSettings, saveSettings } from "../lib/store.js";
 
@@ -54,7 +55,7 @@ async function onVerify() {
     select.disabled = false;
     setStatus("token 有效，可以继续", "ok");
   } catch (err) {
-    setStatus(isNetworkError(err) ? "网络不可用" : `验证失败：${err.message || err}`, "err");
+    setStatus(isNetworkError(err) ? "网络不可用" : `验证失败：${friendlyError(err)}`, "err");
   }
 }
 
@@ -87,7 +88,7 @@ async function onInit() {
     $("open-repo").href = `https://github.com/${info.owner}/${info.repo}`;
     setStatus(`✓ 已就绪：${info.owner}/${info.repo}`, "ok");
   } catch (err) {
-    setStatus(isNetworkError(err) ? "网络不可用" : `初始化失败：${err.message || err}`, "err");
+    setStatus(isNetworkError(err) ? "网络不可用" : `初始化失败：${friendlyError(err)}`, "err");
   } finally {
     $("init").disabled = false;
   }

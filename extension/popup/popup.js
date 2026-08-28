@@ -10,6 +10,7 @@ import {
   renderReadme,
   putFile,
   isNetworkError,
+  friendlyError,
 } from "../lib/github.js";
 
 const $ = (id) => document.getElementById(id);
@@ -102,7 +103,7 @@ async function onSave(settings) {
       await pushPending(bookmark);
       setStatus("离线已排队，联网后自动同步", "ok");
     } else {
-      setStatus(`保存失败：${err.message || err}`, "err");
+      setStatus(`保存失败：${friendlyError(err)}`, "err");
     }
   }
 }

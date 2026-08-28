@@ -92,6 +92,21 @@ export function isNetworkError(err) {
   );
 }
 
+export function friendlyError(err) {
+  if (isNetworkError(err)) return "网络不可用，已离线保存";
+  const status = err && err.status;
+  if (status === 401) {
+    return "token 无效或已过期，请到设置页重新生成";
+  }
+  if (status === 403) {
+    return "token 权限不足：细粒度 token 需选中目标仓库且 Contents 为「读写」；classic token 需勾选 repo 权限";
+  }
+  if (status === 404) {
+    return "仓库不存在或该 token 无权访问，请检查仓库名和 token 权限";
+  }
+  return err && err.message ? err.message : String(err);
+}
+
 // ---------- 用户与仓库 ----------
 
 export async function getCurrentUser(token) {
