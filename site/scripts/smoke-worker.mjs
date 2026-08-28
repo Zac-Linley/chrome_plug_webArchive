@@ -1,4 +1,5 @@
 // Worker 冒烟测试：模拟 env、GitHub API 与 caches，验证路由和数据读取
+// 运行：node scripts/smoke-worker.mjs
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";

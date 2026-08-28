@@ -28,6 +28,12 @@ npm run deploy
 
 部署完成后会得到一个 `*.workers.dev` 地址，直接打开即可使用。
 
+## 本地测试
+
+```bash
+node scripts/smoke-worker.mjs
+```
+
 ## 加访问控制（Cloudflare Access）
 
 网页默认公开，请务必加上私有访问，否则任何人都能打开搜索页看到你的书签：
