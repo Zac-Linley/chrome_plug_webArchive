@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="options.css" />
+    <title>Web Archive 书签 · 设置</title>
+  </head>
+  <body>
+    <main class="card">
+      <h1>Web Archive 书签 · 设置</h1>
+
+      <section>
+        <h2>1. GitHub 凭据</h2>
+        <p class="hint">
+          生成一个只读/写本仓库的 token：
+          <a href="https://github.com/settings/tokens" target="_blank" rel="noreferrer">github.com/settings/tokens</a>
+          ，勾选 <code>repo</code> 权限。
+        </p>
+        <label class="field">
+          <span>Personal Access Token</span>
+          <div class="row">
+            <input id="token" type="password" placeholder="ghp_..." autocomplete="off" />
+            <button id="verify" type="button" class="secondary">验证</button>
+          </div>
+        </label>
+        <p id="user-info" class="info"></p>
+      </section>
+
+      <section>
+        <h2>2. 数据仓库</h2>
+        <label class="radio">
+          <input type="radio" name="mode" value="create" checked />
+          新建私有仓库
+        </label>
+        <div class="row sub">
+          <input id="new-name" type="text" placeholder="仓库名，如 web-bookmarks" />
+        </div>
+
+        <label class="radio">
+          <input type="radio" name="mode" value="existing" />
+          使用现有仓库
+        </label>
+        <div class="row sub">
+          <select id="existing-repo" disabled>
+            <option value="">先验证 token 再选择</option>
+          </select>
+        </div>
+
+        <button id="init" type="button" class="primary">保存并初始化</button>
+        <p id="status" class="status" role="status"></p>
+      </section>
+
+      <section class="links">
+        <a id="open-repo" href="#" target="_blank" rel="noreferrer" hidden>打开数据仓库 ↗</a>
+      </section>
+    </main>
+
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

@@ -1,0 +1,2 @@
+# 复制为 .dev.vars 并在本地开发时填写
+GITHUB_TOKEN=ghp_your_token_here

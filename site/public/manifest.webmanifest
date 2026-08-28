@@ -1,0 +1,21 @@
+{
+  "name": "书签库",
+  "short_name": "书签库",
+  "description": "你的 GitHub 私有书签库",
+  "display": "standalone",
+  "start_url": "/",
+  "background_color": "#ffffff",
+  "theme_color": "#0969da",
+  "icons": [
+    {
+      "src": "/icons/icon128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon48.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    }
+  ]
+}

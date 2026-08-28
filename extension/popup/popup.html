@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div id="setup-hint" class="setup-hint" hidden>
+      <p>还没有配置 GitHub 仓库，收藏功能用不了。</p>
+      <button id="goto-settings" class="primary">去设置</button>
+    </div>
+
+    <form id="save-form" hidden>
+      <header class="header">
+        <span class="title">收藏此页</span>
+        <button type="button" id="open-repo" class="link" title="打开数据仓库">仓库 ↗</button>
+      </header>
+
+      <label class="field">
+        <span>标题</span>
+        <input id="title" type="text" placeholder="页面标题" />
+      </label>
+
+      <label class="field">
+        <span>链接</span>
+        <input id="url" type="text" readonly />
+      </label>
+
+      <label class="field">
+        <span>文件夹</span>
+        <input id="folder" type="text" list="folder-list" placeholder="如：技术/前端（可留空）" />
+        <datalist id="folder-list"></datalist>
+      </label>
+
+      <label class="field">
+        <span>标签</span>
+        <input id="tags" type="text" list="tag-list" placeholder="逗号分隔，如：前端, 教程" />
+        <datalist id="tag-list"></datalist>
+      </label>
+
+      <label class="field">
+        <span>备注</span>
+        <textarea id="note" rows="2" placeholder="选填"></textarea>
+      </label>
+
+      <button id="save" type="submit" class="primary">保存</button>
+      <p id="status" class="status" role="status"></p>
+
+      <footer class="footer">
+        <button type="button" id="open-settings" class="link">设置</button>
+      </footer>
+    </form>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
