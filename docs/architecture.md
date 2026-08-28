@@ -74,11 +74,13 @@ bookmarks/                ← 仓库名自选
 - 设置页：token 校验、新建/复用仓库、仓库初始化
 - 后台：启动时合并 inbox、补推离线队列、重建 README
 
-### 搜索网页（site/）
+### 搜索网页（独立仓库 Zac-Linley/web-archive-search）
 
 - 静态页面：关键词搜索（标题/URL/标签/备注/文件夹）、标签筛选、文件夹分组
 - Worker 接口 `/api/bookmarks`：读取私有仓库数据，60 秒缓存
 - 部署：Workers 静态资源 + secret 存储 token，Workers Builds 接仓库自动部署
+
+站点源码已拆分为独立仓库 [web-archive-search](https://github.com/Zac-Linley/web-archive-search)，部署步骤见该仓库 README。
 
 ### iOS 快捷指令（docs/ios-shortcut.md）
 
@@ -97,12 +99,12 @@ bookmarks/                ← 仓库名自选
 
 1. 在 GitHub 生成 token（repo 权限）
 2. 安装插件并在设置页初始化数据仓库
-3. 部署搜索页（`site/README.md`）并配置 Cloudflare Access
+3. 部署搜索页（独立仓库 [web-archive-search](https://github.com/Zac-Linley/web-archive-search)）并配置 Cloudflare Access
 4. 按 `docs/ios-shortcut.md` 创建快捷指令
 
 ## 测试
 
 ```bash
 node scripts/smoke-github.mjs   # 数据层：建仓、添加、冲突重试、inbox 合并
-node scripts/smoke-worker.mjs   # Worker：路由、缓存、数据读取
+node site/scripts/smoke-worker.mjs  # Worker 测试已随 site/ 拆分到独立仓库
 ```
