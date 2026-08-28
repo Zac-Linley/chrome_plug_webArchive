@@ -2,6 +2,8 @@
 
 快捷指令只做一件事：把当前分享的网页写进仓库的 `data/inbox/` 目录，插件下次同步时自动合并入库。这样 iOS 端不需要处理 JSON 合并和冲突。
 
+> 下面按英文系统界面标注操作名（括号里是中文名），方便对照查找。
+
 ## 前置条件
 
 - 已完成插件设置，GitHub token 拥有该仓库的写权限
@@ -10,11 +12,11 @@
 ## 创建快捷指令步骤
 
 1. 打开「快捷指令」App，新建快捷指令
-2. 添加操作「接收快捷指令输入」，类型设为 URL 和文本（分享菜单里会自动带过来）
-3. 用「从输入中获取 URL」和「从输入中获取名称」拆出链接和标题
-4. 添加「文本」操作，内容粘贴下面的 JSON 模板，把其中 `URL`、`TITLE`、`CREATED_AT` 替换为对应的魔术变量
-5. 对这段 JSON 执行「Base64 编码」
-6. 添加「获取 URL 内容」，方法选 PUT，URL 填：
+2. 添加操作 **Receive Shortcut Input**（接收快捷指令输入），Input Type 选 URL 和 Text（分享菜单里会自动带过来）
+3. 用 **Get URLs from Input**（从输入中获取 URL）和 **Get Name from Input**（从输入中获取名称）拆出链接和标题
+4. 添加 **Text**（文本）操作，内容粘贴下面的 JSON 模板，把其中 `URL`、`TITLE`、`CREATED_AT` 替换为对应的魔术变量
+5. 对这段 JSON 执行 **Base64 Encode**（Base64 编码）
+6. 添加 **Get Contents of URL**（获取 URL 内容），Method 选 PUT，URL 填：
 
 ```
 https://api.github.com/repos/<owner>/<repo>/contents/data/inbox/<YYYY-MM-DDTHH-mm-ss>.json
@@ -27,8 +29,8 @@ https://api.github.com/repos/<owner>/<repo>/contents/data/inbox/<YYYY-MM-DDTHH-m
    - `Accept`：`application/vnd.github+json`
    - `Content-Type`：`application/json`
 8. 请求体粘贴下面的 PUT 请求模板（`CONTENT` 替换为第 5 步的 Base64 结果）
-9. 收尾加一个「显示通知」，提示收藏成功
-10. 快捷指令设置里开启「在共享表单中显示」，并勾选 Safari 等 App
+9. 收尾加一个 **Show Notification**（显示通知），提示收藏成功
+10. 快捷指令设置里开启 **Show in Share Sheet**（在共享表单中显示），并勾选 Safari 等 App
 
 ## JSON 模板（第 4 步用）
 
