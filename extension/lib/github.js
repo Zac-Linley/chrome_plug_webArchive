@@ -160,19 +160,35 @@ export async function getFile(token, owner, repo, path, branch) {
 }
 
 export async function putFile(token, owner, repo, path, content, { sha, message, branch } = {}) {
-  // 更新已存在的文件必须携带 sha；未提供时自动读取一次，避免漏传
+  // 更新已存在的文件必须携带 sha。未提供时自动读取一次；
+  // 若仍遇到 409 冲突（另一处并发写入），自动重读最新 sha 重试。
+  // 注意：调用方显式传入 sha 时（读改写流程），冲突交回调用方重试，避免覆盖并发修改。
+  const callerControlsSha = sha !== undefined;
   let finalSha = sha;
-  if (!finalSha) {
-    const existing = await getFile(token, owner, repo, path, branch);
-    finalSha = existing ? existing.sha : null;
+  let lastErr;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    if (!finalSha) {
+      const existing = await getFile(token, owner, repo, path, branch);
+      finalSha = existing ? existing.sha : null;
+    }
+    const body = { message: message || `Update ${path}`, content: encodeBase64(content) };
+    if (finalSha) body.sha = finalSha;
+    if (branch) body.branch = branch;
+    try {
+      return await request(token, `/repos/${owner}/${repo}/contents/${encodePath(path)}`, {
+        method: "PUT",
+        body,
+      });
+    } catch (err) {
+      lastErr = err;
+      if (!callerControlsSha && err.status === 409 && attempt < 3) {
+        finalSha = undefined; // 重新读取最新 sha
+        continue;
+      }
+      throw err;
+    }
   }
-  const body = { message: message || `Update ${path}`, content: encodeBase64(content) };
-  if (finalSha) body.sha = finalSha;
-  if (branch) body.branch = branch;
-  return request(token, `/repos/${owner}/${repo}/contents/${encodePath(path)}`, {
-    method: "PUT",
-    body,
-  });
+  throw lastErr;
 }
 
 export async function listDir(token, owner, repo, path, branch) {

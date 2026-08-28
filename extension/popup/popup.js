@@ -86,7 +86,11 @@ async function onSave(settings) {
     await addBookmark(settings.token, settings.owner, settings.repo, bookmark, {
       branch: settings.branch,
     });
-    await refreshReadme(settings);
+    try {
+      await refreshReadme(settings);
+    } catch {
+      // README 是派生文件，重建失败不影响书签本身，下次同步会补
+    }
     const { bookmarks } = await readBookmarks(
       settings.token,
       settings.owner,

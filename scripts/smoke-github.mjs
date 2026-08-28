@@ -22,6 +22,7 @@ const {
 const files = new Map(); // path -> { content, sha }
 let shaSeq = 100;
 let conflictOnce = true;
+let conflictReadmeOnce = true;
 
 function b64(str) {
   return Buffer.from(str, "utf8").toString("base64");
@@ -69,6 +70,10 @@ async function fakeFetch(url, init = {}) {
   }
   if (contentMatch && method === "PUT") {
     const path = contentMatch[3];
+    if (conflictReadmeOnce && path === "README.md" && files.has(path)) {
+      conflictReadmeOnce = false;
+      return fakeResponse(409, { message: `${path} does not match stale-sha` });
+    }
     if (conflictOnce && path === "data/bookmarks.json" && files.has(path)) {
       conflictOnce = false;
       return fakeResponse(409, { message: "reference is stale" });
@@ -157,7 +162,15 @@ await putFile("tok", "tester", "bookmarks", "README.md", renderReadme(bookmarks,
   message: "Update README",
   branch: "main",
 });
-assert(true, "无 sha 更新已存在文件成功（自动补 sha）");
+assert(files.get("README.md").content.includes("示例文章"), "无 sha 更新已存在文件成功（自动补 sha）");
+
+// 4c. 并发冲突后自动重试
+conflictReadmeOnce = true;
+await putFile("tok", "tester", "bookmarks", "README.md", renderReadme(bookmarks, "tester", "bookmarks"), {
+  message: "Update README",
+  branch: "main",
+});
+assert(files.get("README.md").content.includes("示例文章"), "README 遇到 409 后自动重读 sha 重试成功");
 
 // 5. 合并 inbox
 function setInboxEntry(name, payload) {
