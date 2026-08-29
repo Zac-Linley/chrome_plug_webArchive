@@ -23,9 +23,8 @@ bookmarks/                ← 仓库名自选
 │   └── inbox/            ← iOS 快捷指令写入入口（每条一个文件，避免并发冲突）
 └── snapshots/            ← 可选快照，后续版本支持
     └── <bookmark-id>/
-        ├── page.md
-        ├── page.html
-        └── page.png
+        ├── page.md       ← 正文提取（markdown）
+        └── page.html     ← 网页存档（完整 HTML）
 ```
 
 ## 数据模型（bookmarks.json）
@@ -72,6 +71,7 @@ bookmarks/                ← 仓库名自选
 ### Chrome 插件（extension/）
 
 - 弹窗：收藏当前页，填文件夹、标签、备注
+- 快照：可选保存 HTML + Markdown（Readability 提取正文 + Turndown 转 Markdown），上传到 `snapshots/<id>/`
 - 设置页：token 校验、新建/复用仓库、仓库初始化
 - 后台：启动时合并 inbox、补推离线队列、重建 README
 
@@ -99,7 +99,7 @@ bookmarks/                ← 仓库名自选
 - [x] 网页删除书签（软删除，Access 登录态）
 - [x] 网页标签管理（重命名/合并/删除）
 - [x] Worker 写入后自动重建 README
-- [ ] 快照功能（后续版本）
+- [x] 快照功能（HTML + Markdown，不含截图）
 
 ## 上线前需要你操作的事
 
