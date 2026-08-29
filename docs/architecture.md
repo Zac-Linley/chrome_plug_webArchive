@@ -77,8 +77,8 @@ bookmarks/                ← 仓库名自选
 
 ### 搜索网页（独立仓库 Zac-Linley/web-archive-search）
 
-- 静态页面：关键词搜索（标题/URL/标签/备注/文件夹）、标签筛选、文件夹分组、删除书签、标签管理（重命名/合并/删除）
-- Worker 接口：`/api/bookmarks` 读取数据（60 秒缓存）、`/api/add` 快捷指令入库、`/api/delete` 软删除、`/api/tags/*` 标签管理
+- 静态页面：关键词搜索（标题/URL/标签/备注/文件夹）、标签筛选、文件夹分组、删除书签、标签管理（重命名/合并/删除）、快照预览（Markdown/HTML 弹窗内直接查看）
+- Worker 接口：`/api/bookmarks` 读取数据（60 秒缓存）、`/api/add` 快捷指令入库、`/api/delete` 软删除、`/api/tags/*` 标签管理、`/api/snapshot` 快照内容预览
 - 写入成功后自动重建 README，仓库门面始终最新
 - 部署：Workers 静态资源 + secret 存储 token，Workers Builds 接仓库自动部署
 
