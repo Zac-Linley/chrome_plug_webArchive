@@ -47,14 +47,26 @@ async function init() {
 
 function fillSuggestions(cache) {
   if (!cache || !Array.isArray(cache.items)) return;
-  const folders = new Set();
-  const tags = new Set();
+  const folderCounts = new Map();
+  const tagCounts = new Map();
   for (const item of cache.items) {
-    if (item.folder) folders.add(item.folder);
-    for (const tag of item.tags || []) tags.add(tag);
+    if (item.folder) {
+      folderCounts.set(item.folder, (folderCounts.get(item.folder) || 0) + 1);
+    }
+    for (const tag of item.tags || []) {
+      tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+    }
   }
-  $("folder-list").innerHTML = [...folders].map((f) => `<option value="${escapeHtml(f)}"></option>`).join("");
-  $("tag-list").innerHTML = [...tags].map((t) => `<option value="${escapeHtml(t)}"></option>`).join("");
+  const byUsage = (a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "zh-CN");
+  $("folder-list").innerHTML = [...folderCounts.entries()]
+    .sort(byUsage)
+    .map(([f]) => `<option value="${escapeHtml(f)}"></option>`)
+    .join("");
+  $("tag-list").innerHTML = [...tagCounts.entries()]
+    .sort(byUsage)
+    .slice(0, 30)
+    .map(([t]) => `<option value="${escapeHtml(t)}"></option>`)
+    .join("");
 }
 
 function escapeHtml(s) {
