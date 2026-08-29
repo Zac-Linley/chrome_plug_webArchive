@@ -9,11 +9,13 @@ import {
   readBookmarks,
   renderReadme,
   putFile,
+  saveSnapshot,
   isNetworkError,
   friendlyError,
 } from "../lib/github.js";
 
 const $ = (id) => document.getElementById(id);
+let currentTab = null;
 
 document.addEventListener("DOMContentLoaded", init);
 
@@ -45,6 +47,7 @@ async function init() {
   });
 
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  currentTab = tab;
   if (tab && tab.url && !tab.url.startsWith("chrome://")) {
     $("url").value = tab.url;
     $("title").value = tab.title || "";
@@ -156,8 +159,9 @@ async function onSave(settings) {
   const url = $("url").value.trim();
   if (!url) return setStatus("没有可收藏的链接", "err");
 
+  const id = crypto.randomUUID();
   const bookmark = {
-    id: crypto.randomUUID(),
+    id,
     url,
     title: $("title").value.trim() || url,
     folder: $("folder").value.trim(),
@@ -171,6 +175,28 @@ async function onSave(settings) {
   };
 
   setBusy(true);
+  let snapshotSaved = false;
+  if ($("snapshot").checked && currentTab && currentTab.id) {
+    setStatus("正在提取网页快照…");
+    try {
+      const snap = await extractSnapshot(currentTab.id);
+      if (snap && (snap.html || snap.markdown)) {
+        await saveSnapshot(settings.token, settings.owner, settings.repo, id, snap, {
+          branch: settings.branch,
+        });
+        bookmark.snapshot = {
+          markdown: `snapshots/${id}/page.md`,
+          html: `snapshots/${id}/page.html`,
+        };
+        snapshotSaved = true;
+      }
+    } catch {
+      // 提取/上传失败不阻断保存
+    }
+    if (!snapshotSaved) {
+      setStatus("快照提取失败，将仅保存书签");
+    }
+  }
   setStatus("正在保存…");
 
   try {
@@ -189,7 +215,11 @@ async function onSave(settings) {
       settings.branch
     );
     await saveCache(bookmarks);
-    setStatus(result.duplicate ? "已更新已有书签 ✓" : "已收藏 ✓", "ok");
+    setStatus(
+      (result.duplicate ? "已更新已有书签" : "已收藏") +
+        (snapshotSaved ? "（含快照）✓" : " ✓"),
+      "ok"
+    );
     setBusy(false);
     setTimeout(() => window.close(), 900);
   } catch (err) {
@@ -201,6 +231,44 @@ async function onSave(settings) {
       setStatus(`保存失败：${friendlyError(err)}`, "err");
     }
   }
+}
+
+// 在页面中注入 Readability + Turndown，提取干净 HTML 与 Markdown
+async function extractSnapshot(tabId) {
+  await chrome.scripting.executeScript({
+    target: { tabId },
+    files: ["vendor/Readability.js", "vendor/turndown.js"],
+  });
+  const [result] = await chrome.scripting.executeScript({
+    target: { tabId },
+    func: () => {
+      const html = document.documentElement
+        ? document.documentElement.outerHTML
+        : "";
+      let markdown = "";
+      try {
+        const reader = new Readability(document.cloneNode(true));
+        const article = reader.parse();
+        if (article && article.content) {
+          const turndown = new TurndownService({
+            headingStyle: "atx",
+            codeBlockStyle: "fenced",
+            bulletListMarker: "-",
+          });
+          markdown = turndown.turndown(article.content);
+        } else if (document.body) {
+          markdown = document.body.innerText;
+        }
+      } catch {
+        if (document.body) markdown = document.body.innerText;
+      }
+      return {
+        html: html.slice(0, 1500000),
+        markdown: markdown.slice(0, 500000),
+      };
+    },
+  });
+  return result && result.result;
 }
 
 async function refreshReadme(settings) {

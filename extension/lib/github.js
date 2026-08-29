@@ -294,6 +294,36 @@ export async function addBookmark(token, owner, repo, bookmark, { branch } = {})
   return { ...result, duplicate };
 }
 
+// 上传快照文件到 snapshots/<id>/（page.md + page.html）
+export async function saveSnapshot(
+  token,
+  owner,
+  repo,
+  id,
+  { html, markdown },
+  { branch } = {}
+) {
+  const base = `snapshots/${id}`;
+  const tasks = [];
+  if (markdown) {
+    tasks.push(
+      putFile(token, owner, repo, `${base}/page.md`, markdown, {
+        message: `Snapshot: ${id}`,
+        branch,
+      })
+    );
+  }
+  if (html) {
+    tasks.push(
+      putFile(token, owner, repo, `${base}/page.html`, html, {
+        message: `Snapshot: ${id}`,
+        branch,
+      })
+    );
+  }
+  await Promise.all(tasks);
+}
+
 export async function mergeInbox(token, owner, repo, { branch, now = new Date() } = {}) {
   const dir = await listDir(token, owner, repo, "data/inbox", branch);
   const entries = dir.filter(

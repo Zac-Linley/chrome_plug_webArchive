@@ -3,7 +3,7 @@
   "name": "Web Archive 书签",
   "version": "0.1.0",
   "description": "收藏网页到你的 GitHub 私有仓库",
-  "permissions": ["storage", "tabs", "contextMenus"],
+  "permissions": ["storage", "tabs", "contextMenus", "scripting", "activeTab"],
   "host_permissions": ["https://api.github.com/*"],
   "background": {
     "service_worker": "background.js",
