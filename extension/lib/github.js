@@ -442,51 +442,90 @@ export function renderReadme(bookmarks, owner, repo) {
   const lines = [];
   lines.push("# 📚 Web Archive 书签目录");
   lines.push("");
-  lines.push(`> 共 **${items.length}** 条书签 · 最后更新：${formatTime(bm.updatedAt)}`);
-  lines.push("");
-  lines.push("> 本文件由插件自动生成，请勿手改。数据源：[data/bookmarks.json](data/bookmarks.json)");
-  lines.push("");
 
   const folders = {};
   for (const it of items) {
     const key = it.folder && it.folder.trim() ? it.folder : "未分类";
     (folders[key] ||= []).push(it);
   }
-  for (const folder of Object.keys(folders).sort((a, b) => a.localeCompare(b, "zh-CN"))) {
-    lines.push(`## 📁 ${folder}`);
+  const counts = new Map();
+  for (const it of items) for (const t of it.tags || []) counts.set(t, (counts.get(t) || 0) + 1);
+  const folderNames = Object.keys(folders).sort((a, b) => a.localeCompare(b, "zh-CN"));
+
+  lines.push(
+    `> **${items.length}** 条书签 · **${folderNames.length}** 个文件夹 · **${counts.size}** 个标签 · 最后更新：${formatTime(bm.updatedAt)}`
+  );
+  lines.push("");
+  lines.push("> 本文件自动生成，请勿手改。数据源：[data/bookmarks.json](data/bookmarks.json)");
+  lines.push("");
+
+  if (!items.length) {
+    lines.push("还没有书签。");
     lines.push("");
-    const list = folders[folder].slice().sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    lines.push("---");
+    lines.push(`_生成于 ${formatTime(new Date().toISOString())}_`);
+    return lines.join("\n");
+  }
+
+  // 目录
+  lines.push("## 📖 目录");
+  lines.push("");
+  lines.push(
+    `📁 ${folderNames
+      .map(
+        (f, i) => `[${f}](#folder-${i + 1})（${folders[f].length}）`
+      )
+      .join(" · ")}`
+  );
+  lines.push("");
+  if (counts.size) lines.push(`[🏷️ 标签](#tags)（${counts.size}） · [🕘 最近添加](#recent)`);
+  lines.push("");
+
+  // 文件夹
+  folderNames.forEach((folder, i) => {
+    lines.push(`<a id="folder-${i + 1}"></a>`);
+    lines.push(`## 📁 ${folder}（${folders[folder].length}）`);
+    lines.push("");
+    const list = folders[folder]
+      .slice()
+      .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
     for (const it of list) {
       const tags = (it.tags || []).map((t) => `\`#${t}\``).join(" ");
-      const note = it.note ? ` — ${escapeMarkdown(it.note)}` : "";
+      const note = it.note ? ` — ${escapeMarkdown(truncateNote(it.note))}` : "";
       const title = escapeMarkdown(it.title || it.url);
       const link = it.url ? `[${title}](${it.url})` : title;
       lines.push(`- ${link} ${tags}${note}`);
     }
     lines.push("");
-  }
+  });
 
-  const counts = new Map();
-  for (const it of items) for (const t of it.tags || []) counts.set(t, (counts.get(t) || 0) + 1);
+  // 标签（紧凑单行）
   if (counts.size) {
-    lines.push("## 🏷️ 标签");
+    lines.push(`<a id="tags"></a>`);
+    lines.push(`## 🏷️ 标签（${counts.size}）`);
     lines.push("");
-    for (const [tag, count] of [...counts.entries()].sort((a, b) => b[1] - a[1])) {
-      const q = encodeURIComponent(tag);
-      lines.push(`- [\`#${tag}\`](https://github.com/${owner}/${repo}/search?q=${q}&type=code)（${count}）`);
-    }
+    const tagLine = [...counts.entries()]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "zh-CN"))
+      .map(
+        ([tag, count]) =>
+          `[\`#${tag}\`](https://github.com/${owner}/${repo}/search?q=${encodeURIComponent(tag)}&type=code)（${count}）`
+      )
+      .join(" · ");
+    lines.push(tagLine);
     lines.push("");
   }
 
+  // 最近添加
   const recent = items.slice().sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)).slice(0, 10);
   if (recent.length) {
+    lines.push(`<a id="recent"></a>`);
     lines.push("## 🕘 最近添加");
     lines.push("");
     for (const it of recent) {
       const tags = (it.tags || []).map((t) => `\`#${t}\``).join(" ");
       const title = escapeMarkdown(it.title || it.url);
       const link = it.url ? `[${title}](${it.url})` : title;
-      lines.push(`- ${link} ${tags}`);
+      lines.push(`- ${link} ${tags} · ${dateOnly(it.createdAt)}`);
     }
     lines.push("");
   }
@@ -494,4 +533,18 @@ export function renderReadme(bookmarks, owner, repo) {
   lines.push("---");
   lines.push(`_生成于 ${formatTime(new Date().toISOString())}_`);
   return lines.join("\n");
+}
+
+function truncateNote(note) {
+  const s = String(note || "").replace(/\s+/g, " ").trim();
+  return s.length > 48 ? s.slice(0, 48) + "…" : s;
+}
+
+function dateOnly(iso) {
+  if (!iso) return "";
+  try {
+    return new Date(iso).toISOString().slice(0, 10);
+  } catch {
+    return "";
+  }
 }
