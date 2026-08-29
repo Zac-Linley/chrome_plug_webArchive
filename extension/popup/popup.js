@@ -41,7 +41,20 @@ async function init() {
     $("title").value = tab.title || "";
   }
 
-  const cache = await getCache();
+  // 优先从仓库拉最新数据刷新缓存，离线时退回本地缓存
+  let cache = await getCache();
+  try {
+    const { bookmarks } = await readBookmarks(
+      settings.token,
+      settings.owner,
+      settings.repo,
+      settings.branch
+    );
+    await saveCache(bookmarks);
+    cache = bookmarks;
+  } catch {
+    // 网络不可用，继续用本地缓存
+  }
   fillSuggestions(cache);
 }
 
