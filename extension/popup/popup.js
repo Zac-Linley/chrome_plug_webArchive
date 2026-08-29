@@ -35,6 +35,14 @@ async function init() {
   });
   $("open-settings").addEventListener("click", () => chrome.runtime.openOptionsPage());
   document.addEventListener("click", onSuggestClick);
+  $("folder-arrow").addEventListener("click", () => toggleDropdown("folder"));
+  $("tags-arrow").addEventListener("click", () => toggleDropdown("tags"));
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".combo")) closeDropdowns();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeDropdowns();
+  });
 
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (tab && tab.url && !tab.url.startsWith("chrome://")) {
@@ -77,15 +85,6 @@ function fillSuggestions(cache) {
     }
   }
   const byUsage = (a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "zh-CN");
-  $("folder-list").innerHTML = [...folderCounts.entries()]
-    .sort(byUsage)
-    .map(([f]) => `<option value="${escapeHtml(f)}"></option>`)
-    .join("");
-  $("tag-list").innerHTML = [...tagCounts.entries()]
-    .sort(byUsage)
-    .slice(0, 30)
-    .map(([t]) => `<option value="${escapeHtml(t)}"></option>`)
-    .join("");
   const folderChips = [...folderCounts.entries()]
     .sort(byUsage)
     .slice(0, 8)
@@ -100,24 +99,53 @@ function fillSuggestions(cache) {
   $("folder-suggest").hidden = !folderChips;
   $("tag-suggest").innerHTML = tagChips;
   $("tag-suggest").hidden = !tagChips;
+  $("folder-dropdown").innerHTML = [...folderCounts.entries()]
+    .sort(byUsage)
+    .map(([f]) => `<button type="button" class="opt" data-select="folder" data-value="${escapeHtml(f)}">${escapeHtml(f)}</button>`)
+    .join("");
+  $("tags-dropdown").innerHTML = [...tagCounts.entries()]
+    .sort(byUsage)
+    .map(([t]) => `<button type="button" class="opt" data-select="tags" data-value="${escapeHtml(t)}">#${escapeHtml(t)}</button>`)
+    .join("");
 }
 
 function onSuggestClick(e) {
+  const opt = e.target.closest("[data-select]");
+  if (opt) {
+    fillField(opt.dataset.select, opt.dataset.value);
+    closeDropdowns();
+    return;
+  }
   const chip = e.target.closest("[data-suggest]");
   if (!chip) return;
-  const value = chip.dataset.value;
-  if (chip.dataset.suggest === "folder") {
+  fillField(chip.dataset.suggest, chip.dataset.value);
+}
+
+function fillField(kind, value) {
+  if (kind === "folder") {
     $("folder").value = value;
-  } else {
-    const current = $("tags").value
-      .split(/[,，]/)
-      .map((s) => s.trim())
-      .filter(Boolean);
-    if (!current.includes(value)) {
-      current.push(value);
-      $("tags").value = current.join(", ");
-    }
+    return;
   }
+  const current = $("tags").value
+    .split(/[,，]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (!current.includes(value)) {
+    current.push(value);
+    $("tags").value = current.join(", ");
+  }
+}
+
+function toggleDropdown(kind) {
+  const dropdown = $(`${kind}-dropdown`);
+  const wasHidden = dropdown.hidden;
+  closeDropdowns();
+  dropdown.hidden = !wasHidden;
+}
+
+function closeDropdowns() {
+  $("folder-dropdown").hidden = true;
+  $("tags-dropdown").hidden = true;
 }
 
 function escapeHtml(s) {

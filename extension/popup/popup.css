@@ -145,6 +145,65 @@ button.link {
   color: var(--accent);
 }
 
+.combo {
+  position: relative;
+  display: flex;
+}
+
+.combo input {
+  border-radius: 6px 0 0 6px;
+}
+
+.combo .arrow {
+  width: 34px;
+  border: 1px solid var(--border);
+  border-left: none;
+  border-radius: 0 6px 6px 0;
+  background: #f6f8fa;
+  color: var(--muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.combo .arrow:hover {
+  color: var(--accent);
+  background: #eef4fc;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 3px);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  max-height: 180px;
+  overflow: auto;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.dropdown .opt {
+  display: block;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  background: none;
+  text-align: left;
+  font: inherit;
+  color: var(--fg);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown .opt:hover {
+  background: #eef4fc;
+  color: var(--accent);
+}
+
 .hint {
   margin: 8px 0 0;
   font-size: 12px;

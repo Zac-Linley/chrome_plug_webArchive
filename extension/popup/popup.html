@@ -28,15 +28,21 @@
 
       <label class="field">
         <span>文件夹</span>
-        <input id="folder" type="text" list="folder-list" placeholder="如：技术/前端（可留空）" />
-        <datalist id="folder-list"></datalist>
+        <div class="combo">
+          <input id="folder" type="text" placeholder="如：技术/前端（可留空）" />
+          <button type="button" class="arrow" id="folder-arrow" title="选择已有文件夹">▾</button>
+          <div class="dropdown" id="folder-dropdown" hidden></div>
+        </div>
         <div id="folder-suggest" class="suggest" hidden></div>
       </label>
 
       <label class="field">
         <span>标签</span>
-        <input id="tags" type="text" list="tag-list" placeholder="逗号分隔，如：前端, 教程" />
-        <datalist id="tag-list"></datalist>
+        <div class="combo">
+          <input id="tags" type="text" placeholder="逗号分隔，如：前端, 教程" />
+          <button type="button" class="arrow" id="tags-arrow" title="选择已有标签">▾</button>
+          <div class="dropdown" id="tags-dropdown" hidden></div>
+        </div>
         <div id="tag-suggest" class="suggest" hidden></div>
       </label>
 
