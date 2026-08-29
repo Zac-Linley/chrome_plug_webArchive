@@ -34,6 +34,7 @@ async function init() {
     chrome.tabs.create({ url: `https://github.com/${settings.owner}/${settings.repo}` });
   });
   $("open-settings").addEventListener("click", () => chrome.runtime.openOptionsPage());
+  document.addEventListener("click", onSuggestClick);
 
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (tab && tab.url && !tab.url.startsWith("chrome://")) {
@@ -43,6 +44,7 @@ async function init() {
 
   // 优先从仓库拉最新数据刷新缓存，离线时退回本地缓存
   let cache = await getCache();
+  let fetched = false;
   try {
     const { bookmarks } = await readBookmarks(
       settings.token,
@@ -52,10 +54,14 @@ async function init() {
     );
     await saveCache(bookmarks);
     cache = bookmarks;
+    fetched = true;
   } catch {
     // 网络不可用，继续用本地缓存
   }
   fillSuggestions(cache);
+  if (!fetched && !(cache && Array.isArray(cache.items) && cache.items.length)) {
+    $("suggest-hint").hidden = false;
+  }
 }
 
 function fillSuggestions(cache) {
@@ -80,6 +86,38 @@ function fillSuggestions(cache) {
     .slice(0, 30)
     .map(([t]) => `<option value="${escapeHtml(t)}"></option>`)
     .join("");
+  const folderChips = [...folderCounts.entries()]
+    .sort(byUsage)
+    .slice(0, 8)
+    .map(([f]) => `<button type="button" class="chip" data-suggest="folder" data-value="${escapeHtml(f)}">${escapeHtml(f)}</button>`)
+    .join("");
+  const tagChips = [...tagCounts.entries()]
+    .sort(byUsage)
+    .slice(0, 12)
+    .map(([t]) => `<button type="button" class="chip" data-suggest="tag" data-value="${escapeHtml(t)}">#${escapeHtml(t)}</button>`)
+    .join("");
+  $("folder-suggest").innerHTML = folderChips;
+  $("folder-suggest").hidden = !folderChips;
+  $("tag-suggest").innerHTML = tagChips;
+  $("tag-suggest").hidden = !tagChips;
+}
+
+function onSuggestClick(e) {
+  const chip = e.target.closest("[data-suggest]");
+  if (!chip) return;
+  const value = chip.dataset.value;
+  if (chip.dataset.suggest === "folder") {
+    $("folder").value = value;
+  } else {
+    const current = $("tags").value
+      .split(/[,，]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (!current.includes(value)) {
+      current.push(value);
+      $("tags").value = current.join(", ");
+    }
+  }
 }
 
 function escapeHtml(s) {

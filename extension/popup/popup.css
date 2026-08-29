@@ -122,3 +122,31 @@ button.link {
   margin: 0 0 14px;
   color: var(--muted);
 }
+
+.suggest {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.suggest .chip {
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #f6f8fa;
+  color: var(--fg);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.suggest .chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.hint {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--err);
+}
