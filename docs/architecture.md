@@ -10,7 +10,7 @@
 
 ```
 Chrome 插件 ──写入──> GitHub 私有仓库（唯一数据源）──读取──> Cloudflare 搜索网页
-iOS 快捷指令 ──> data/inbox/ ──插件下次同步合并──> data/bookmarks.json
+iOS 快捷指令 ──> /api/add（Worker 抓标题并直接合并）──> data/bookmarks.json
 ```
 
 ## 仓库目录结构（数据仓库）
@@ -56,9 +56,10 @@ bookmarks/                ← 仓库名自选
 
 - 写入采用 GitHub Contents API 的「读 → 改 → 写」流程，携带文件 sha
 - 冲突（409）时自动重试，最多 4 次，个人使用几乎不会触发
-- 删除采用软删除（`deleted: true`），避免同步误恢复
+- 同一链接重复收藏时自动更新已有记录（插件、Worker 均按 URL 去重）
+- 删除采用软删除（`deleted: true`），搜索网页提供删除按钮（依赖 Cloudflare Access 登录态）
 - 本地 `chrome.storage.local` 缓存数据，离线时进入待同步队列，联网后自动补推
-- inbox 条目按 URL 去重，避免重复收藏
+- `data/inbox/` 作为兼容入口保留，插件同步时按 URL 去重合并
 
 ## 安全
 
@@ -84,7 +85,8 @@ bookmarks/                ← 仓库名自选
 
 ### iOS 快捷指令（docs/ios-shortcut.md）
 
-- 分享菜单接收 URL 与标题，写一条 inbox 文件，等插件下次同步合并
+- 分享菜单把链接发到 Worker 的 `/api/add`，Worker 抓取标题后直接合并入库（按 URL 去重），无需等待插件
+- 有现成的已签名快捷指令文件，推荐直接导入使用
 
 ## 开发状态
 
@@ -92,7 +94,9 @@ bookmarks/                ← 仓库名自选
 - [x] GitHub 数据层（读写、冲突重试、inbox 合并、README 生成）
 - [x] Chrome 插件（弹窗录入、设置页、后台同步）
 - [x] 搜索网页（Worker 接口 + 静态搜索页，已通过模拟测试）
-- [x] iOS 快捷指令文档
+- [x] iOS 快捷指令（现成文件 + /api/add 直接入库）
+- [x] 网页删除书签（软删除，Access 登录态）
+- [ ] 标签管理（重命名/合并/删除）
 - [ ] 快照功能（后续版本）
 
 ## 上线前需要你操作的事

@@ -151,6 +151,17 @@ let { bookmarks } = await readBookmarks("tok", "tester", "bookmarks", "main");
 assert(bookmarks.items.length === 1, "添加书签成功（含冲突重试）");
 assert(bookmarks.items[0].tags.includes("前端"), "标签保留");
 
+// 3b. 同链接再次保存 → 更新已有记录，不产生重复
+const dupResult = await addBookmark("tok", "tester", "bookmarks", {
+  ...bookmark,
+  title: "示例文章（更新）",
+  tags: ["前端", "更新"],
+}, { branch: "main" });
+assert(dupResult.duplicate === true, "同链接保存标记为已存在");
+({ bookmarks } = await readBookmarks("tok", "tester", "bookmarks", "main"));
+assert(bookmarks.items.length === 1, "同链接保存不产生重复记录");
+assert(bookmarks.items[0].title === "示例文章（更新）", "同链接保存更新标题");
+
 // 4. README 内容
 const readme = renderReadme(bookmarks, "tester", "bookmarks");
 assert(readme.includes("示例文章"), "README 含书签标题");

@@ -260,15 +260,29 @@ export async function readBookmarks(token, owner, repo, branch) {
 }
 
 export async function addBookmark(token, owner, repo, bookmark, { branch } = {}) {
-  return updateJsonFile(
+  let duplicate = false;
+  const result = await updateJsonFile(
     token,
     owner,
     repo,
     "data/bookmarks.json",
     (current) => {
       const bm = normalizeBookmarks(current);
-      bm.items = bm.items.filter((it) => it && it.id !== bookmark.id);
-      bm.items.unshift(bookmark);
+      const existing = bm.items.find(
+        (it) => it && it.url === bookmark.url && !it.deleted
+      );
+      if (existing) {
+        // 同链接已存在：更新内容而不是新增重复记录
+        duplicate = true;
+        existing.title = bookmark.title;
+        existing.folder = bookmark.folder;
+        existing.tags = bookmark.tags;
+        existing.note = bookmark.note;
+        existing.updatedAt = bookmark.updatedAt;
+      } else {
+        bm.items = bm.items.filter((it) => it && it.id !== bookmark.id);
+        bm.items.unshift(bookmark);
+      }
       bm.updatedAt = bookmark.updatedAt || new Date().toISOString();
       return bm;
     },
@@ -277,6 +291,7 @@ export async function addBookmark(token, owner, repo, bookmark, { branch } = {})
       branch,
     }
   );
+  return { ...result, duplicate };
 }
 
 export async function mergeInbox(token, owner, repo, { branch, now = new Date() } = {}) {

@@ -83,7 +83,7 @@ async function onSave(settings) {
   setStatus("正在保存…");
 
   try {
-    await addBookmark(settings.token, settings.owner, settings.repo, bookmark, {
+    const result = await addBookmark(settings.token, settings.owner, settings.repo, bookmark, {
       branch: settings.branch,
     });
     try {
@@ -98,7 +98,7 @@ async function onSave(settings) {
       settings.branch
     );
     await saveCache(bookmarks);
-    setStatus("已收藏 ✓", "ok");
+    setStatus(result.duplicate ? "已更新已有书签 ✓" : "已收藏 ✓", "ok");
     setBusy(false);
     setTimeout(() => window.close(), 900);
   } catch (err) {
